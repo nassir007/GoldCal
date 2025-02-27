@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gold Value Calculator</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h1>Gold Value Calculator</h1>
+        <form id="goldForm">
+            <label for="weight">Weight (grams):</label>
+            <input type="number" id="weight" step="0.01" required>
+
+            <label for="karat">Karat:</label>
+            <select id="karat" required>
+                <option value="24K">24K</option>
+                <option value="22K">22K</option>
+                <option value="18K">18K</option>
+                <option value="14K">14K</option>
+                <option value="10K">10K</option>
+            </select>
+
+            <label for="totalPrice">Total Price (QAR):</label>
+            <input type="number" id="totalPrice" step="0.01" required>
+
+            <button type="submit">Calculate</button>
+        </form>
+
+        <div id="result" class="hidden">
+            <h2>Results</h2>
+            <p><strong>Gold Price (per gram):</strong> <span id="goldPricePerGram"></span> QAR/g</p>
+            <p><strong>Gold Value:</strong> <span id="goldValue"></span> QAR</p>
+            <p><strong>Labor Charge:</strong> <span id="laborCharge"></span> QAR</p>
+            <p><strong>Gold Percentage:</strong> <span id="goldPercentage"></span>%</p>
+            <p><strong>Labor Percentage:</strong> <span id="laborPercentage"></span>%</p>
+        </div>
+    </div>
+
+    <script>
+        // Calculate gold value and labor charge
+        document.getElementById("goldForm").addEventListener("submit", async (e) => {
+            e.preventDefault();
+
+            const weight = document.getElementById("weight").value;
+            const karat = document.getElementById("karat").value;
+            const totalPrice = document.getElementById("totalPrice").value;
+
+            const response = await fetch("/calculate", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({ weight, karat, total_price: totalPrice }),
+            });
+
+            const data = await response.json();
+
+            if (data.error) {
+                alert(data.error);
+                return;
+            }
+
+            // Display results
+            document.getElementById("goldPricePerGram").textContent = data.gold_price_per_gram;
+            document.getElementById("goldValue").textContent = data.gold_value;
+            document.getElementById("laborCharge").textContent = data.labor_charge;
+            document.getElementById("goldPercentage").textContent = data.gold_percentage;
+            document.getElementById("laborPercentage").textContent = data.labor_percentage;
+
+            document.getElementById("result").classList.remove("hidden");
+        });
+    </script>
+</body>
+</html>
